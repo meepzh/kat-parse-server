@@ -48,21 +48,17 @@ Parse.Cloud.define('mturk-reset', function(req, res) {
     res.error(403, 'Forbidden: Not logged in');
     return;
   }
-  if (req.user.get('mturkid') !== req.params.mid) {
+  if (req.user.get('username') !== req.params.mid) {
     res.error(403, 'Forbidden: Wrong username');
+    return;
+  }
+  if (req.user.get('mturkid') !== req.params.mid) {
+    res.error(403, 'Forbidden: Wrong ID');
     return;
   }
 
   const password = passwordModule(4);
-  req.user.set('password', password);
-  req.user.save(null, {
-    success: function(resultingUser) {
-      res.success({'password': password});
-    },
-    error: function(resultingUser, error) {
-      res.error(error.code, error.message);
-    }
-  });
+  res.success({'password': password});
 });
 
 Parse.Cloud.afterSave('Session', function(req) {
