@@ -45,11 +45,11 @@ Parse.Cloud.define('mturk-reset', function(req, res) {
     return;
   }
   if (!(req.user)) {
-    res.error(403, 'Forbidden');
+    res.error(403, 'Forbidden: Not logged in');
     return;
   }
   if (req.user.mturkid !== req.params.mid) {
-    res.error(403, 'Forbidden');
+    res.error(403, 'Forbidden: Wrong username');
     return;
   }
 
