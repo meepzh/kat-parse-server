@@ -31,8 +31,9 @@ Parse.Cloud.define('mturk-signup', function (req, res) {
         res.error(error.code, error.message);
       }
     });
+  } else {
+    res.error(406, 'Not Acceptable');
   }
-  res.error(406, 'Not Acceptable');
 });
 
 Parse.Cloud.afterSave('Session', function(req) {
