@@ -1,4 +1,4 @@
-const passwordModule = require('password');
+const passwordGen = require('password');
 
 function constructUserPointer(req, res) {
   const isMaster = req.master;
@@ -46,7 +46,7 @@ Parse.Cloud.define('mturk-signup', function(req, res) {
   }
 
   let user = new Parse.User();
-  const password = passwordModule(4);
+  const password = passwordGen(4);
   user.set('username', mid);
   user.set('password', password);
   user.set('email', `tester-${mid}@nodomain.org`);
@@ -92,7 +92,7 @@ Parse.Cloud.define('mturk-reset', function(req, res) {
 
   const token = user.getSessionToken();
 
-  const password = passwordModule(4);
+  const password = passwordGen(4);
   user.set('password', password);
   user.save(null, {
     sessionToken: token,
@@ -109,7 +109,7 @@ Parse.Cloud.define('sum-total-time', function(req, res) {
   const userPointer = constructUserPointer(req, res);
   if (!userPointer) return;
 
-  let query = Parse.Query('Session');
+  let query = new Parse.Query('Session');
   query.equalTo('player', userPointer);
   query.find({useMasterKey: true}, {
     success: function(results) {
@@ -129,7 +129,7 @@ Parse.Cloud.define('user-export', function(req, res) {
   const userPointer = constructUserPointer(req, res);
   if (!userPointer) return;
 
-  let query = Parse.Query('Session');
+  let query = new Parse.Query('Session');
   query.equalTo('player', userPointer);
   query.find({useMasterKey: true}, {
     success: function(results) {
