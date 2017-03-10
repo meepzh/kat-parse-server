@@ -94,7 +94,8 @@ Parse.Cloud.define('mturk-reset', function(req, res) {
 
   const password = passwordModule(4);
   user.set('password', password);
-  user.save({sessionToken: token}, {
+  user.save(null, {
+    sessionToken: token,
     success: function(resultingUser) {
       res.success({'password': password});
     },
@@ -145,7 +146,8 @@ Parse.Cloud.afterSave('Session', function(req) {
   const token = user.getSessionToken();
 
   user.increment('totalTime', req.object.get('finishTime'));
-  user.save({sessionToken: token}, {
+  user.save(null, {
+    sessionToken: token,
     success: function(resultingUser) {
       res.success('OK');
     },
