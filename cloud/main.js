@@ -58,7 +58,7 @@ Parse.Cloud.define('mturk-signup', function(req, res) {
       res.success({'password': password});
     },
     error: function(resultingUser, error) {
-      res.error(error);
+      res.error(error.code, error.message);
     }
   });
 });
@@ -99,7 +99,7 @@ Parse.Cloud.define('mturk-reset', function(req, res) {
       res.success({'password': password});
     },
     error: function(resultingUser, error) {
-      res.error(error);
+      res.error(error.code, error.message);
     }
   });
 });
@@ -119,7 +119,7 @@ Parse.Cloud.define('sum-total-time', function(req, res) {
       res.success(sum);
     },
     error: function(error) {
-      res.error(error);
+      res.error(error.code, error.message);
     }
   });
 });
@@ -135,7 +135,7 @@ Parse.Cloud.define('user-export', function(req, res) {
       res.success(results);
     },
     error: function(error) {
-      res.error(error);
+      res.error(error.code, error.message);
     }
   });
 });
@@ -150,7 +150,7 @@ Parse.Cloud.afterSave('Session', function(req) {
       res.success('OK');
     },
     error: function(resultingUser, error) {
-      res.error(error);
+      res.error(error.code, error.message);
     }
   });
 });
