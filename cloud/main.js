@@ -24,11 +24,11 @@ function constructUserPointer(req, res) {
   };
 }
 
-Parse.Cloud.define('hello', function(req, res) {
+Parse.Cloud.define('hello', (req, res) => {
   res.success('Hi');
 });
 
-Parse.Cloud.define('mturk-signup', function(req, res) {
+Parse.Cloud.define('mturk-signup', (req, res) => {
   if (!(req.params && req.params.mid)) {
     res.error(406, 'Not Acceptable');
     return;
@@ -53,17 +53,14 @@ Parse.Cloud.define('mturk-signup', function(req, res) {
   user.set('mturkid', mid);
   user.set('completed', false);
 
-  user.signUp(null, {
-    success: function(resultingUser) {
-      res.success({'password': password});
-    },
-    error: function(resultingUser, error) {
-      res.error(error.code, error.message);
-    }
+  user.signUp(null).then((resultingUser) => {
+    res.success({'password': password});
+  }, (resultingUser, error) => {
+    res.error(error.code, error.message);
   });
 });
 
-Parse.Cloud.define('mturk-reset', function(req, res) {
+Parse.Cloud.define('mturk-reset', (req, res) => {
   let user = req.user;
 
   if (!(req.params && req.params.mid)) {
@@ -94,65 +91,51 @@ Parse.Cloud.define('mturk-reset', function(req, res) {
 
   const password = passwordGen(4);
   user.set('password', password);
-  user.save(null, {
-    sessionToken: token,
-    success: function(resultingUser) {
-      res.success({'password': password});
-    },
-    error: function(resultingUser, error) {
-      res.error(error.code, error.message);
-    }
+  user.save(null, {sessionToken: token}).then((resultingUser) => {
+    res.success({'password': password});
+  }, (resultingUser, error) => {
+    res.error(error.code, error.message);
   });
 });
 
-Parse.Cloud.define('sum-total-time', function(req, res) {
+Parse.Cloud.define('sum-total-time', (req, res) => {
   const userPointer = constructUserPointer(req, res);
   if (!userPointer) return;
 
   let query = new Parse.Query('Session');
   query.equalTo('player', userPointer);
-  query.find({useMasterKey: true}, {
-    success: function(results) {
-      var sum = 0;
-      for (var i = 0; i < results.length; ++i) {
-        sum += results[i].get('finishTime');
-      }
-      res.success(sum);
-    },
-    error: function(error) {
-      res.error(error.code, error.message);
+  query.find({useMasterKey: true}).then((results) => {
+    var sum = 0;
+    for (var i = 0; i < results.length; ++i) {
+      sum += results[i].get('finishTime');
     }
+    res.success(sum);
+  }, (error) => {
+    res.error(error.code, error.message);
   });
 });
 
-Parse.Cloud.define('user-export', function(req, res) {
+Parse.Cloud.define('user-export', (req, res) => {
   const userPointer = constructUserPointer(req, res);
   if (!userPointer) return;
 
   let query = new Parse.Query('Session');
   query.equalTo('player', userPointer);
-  query.find({useMasterKey: true}, {
-    success: function(results) {
-      res.success(results);
-    },
-    error: function(error) {
-      res.error(error.code, error.message);
-    }
+  query.find({useMasterKey: true}).then((results) => {
+    res.success(results);
+  }, (error) => {
+    res.error(error.code, error.message);
   });
 });
 
-Parse.Cloud.afterSave('Session', function(req) {
+Parse.Cloud.afterSave('Session', (req) => {
   let user = req.user;
   const token = user.getSessionToken();
 
   user.increment('totalTime', req.object.get('finishTime'));
-  user.save(null, {
-    sessionToken: token,
-    success: function(resultingUser) {
-      res.success('OK');
-    },
-    error: function(resultingUser, error) {
-      res.error(error.code, error.message);
-    }
+  user.save(null, {sessionToken: token}).then((resultingUser) => {
+    res.success('OK');
+  }, (resultingUser, error) => {
+    res.error(error.code, error.message);
   });
 });
