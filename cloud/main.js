@@ -9,21 +9,24 @@ Parse.Cloud.define('mturk-signup', function(req, res) {
     res.error(406, 'Not Acceptable');
     return;
   }
-  if (typeof req.params.mid !== 'string') {
+
+  const mid = req.params.mid;
+
+  if (typeof mid !== 'string') {
     res.error(406, 'ID must be a character sequence');
     return;
   }
-  if (req.params.mid.length < 6 || req.params.mid.length > 28) {
+  if (mid.length < 6 || mid.length > 28) {
     res.error(406, 'Invalid ID length');
     return;
   }
 
   var user = new Parse.User();
   const password = passwordModule(4);
-  user.set('username', req.params.mid);
+  user.set('username', mid);
   user.set('password', password);
-  user.set('email', `tester-${req.params.mid}@nodomain.org`);
-  user.set('mturkid', req.params.mid);
+  user.set('email', `tester-${mid}@nodomain.org`);
+  user.set('mturkid', mid);
   user.set('completed', false);
 
   user.signUp(null, {
@@ -37,31 +40,49 @@ Parse.Cloud.define('mturk-signup', function(req, res) {
 });
 
 Parse.Cloud.define('mturk-reset', function(req, res) {
+  var user = req.user;
+
   if (!(req.params && req.params.mid)) {
     res.error(406, 'Not Acceptable');
   }
-  if (typeof req.params.mid !== 'string') {
+
+  const mid = req.params.mid;
+
+  if (typeof mid !== 'string') {
     res.error(406, 'ID must be a character sequence');
     return;
   }
-  if (!(req.user)) {
+  if (!(user)) {
     res.error(403, 'Forbidden: Not logged in');
     return;
   }
-  if (req.user.get('username') !== req.params.mid) {
+  if (user.get('username') !== mid) {
     res.error(403, 'Forbidden: Wrong username');
     return;
   }
-  if (req.user.get('mturkid') !== req.params.mid) {
+  if (user.get('mturkid') !== mid) {
     res.error(403, 'Forbidden: Wrong ID');
     return;
   }
 
+  const token = user.getSessionToken();
+
   const password = passwordModule(4);
-  res.success({'password': password});
+  user.set('password', password);
+  user.save({sessionToken: token}, {
+    success: function(resultingUser) {
+      res.success({'password': password});
+    },
+    error: function(resultingUser, error) {
+      res.error(error.code, error.message);
+    }
+  });
 });
 
 Parse.Cloud.afterSave('Session', function(req) {
-  req.user.increment('totalTime', req.object.get('finishTime'));
-  req.user.save();
+  var user = req.user;
+  const token = user.getSessionToken();
+
+  user.increment('totalTime', req.object.get('finishTime'));
+  user.save({sessionToken: token});
 });
