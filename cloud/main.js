@@ -20,7 +20,7 @@ function constructUserPointer(req, res) {
   return {
     __type: 'Pointer',
     className: '_User',
-    objectId: req.param.uid
+    objectId: req.params.uid
   };
 }
 
