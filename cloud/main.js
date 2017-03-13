@@ -60,6 +60,27 @@ Parse.Cloud.define('mturk-signup', (req, res) => {
   });
 });
 
+Parse.Cloud.define('init-web-activity', (req, res) => {
+  let user = req.user;
+
+  if (!user) {
+    res.error(403, 'Forbidden: Not logged in');
+    return;
+  }
+
+  const token = user.getSessionToken();
+
+  let WebActivity = Parse.Object.extend('WebActivity');
+  let webActivity = new WebActivity();
+  webActivity.set('user', user);
+  webActivity.setACL(new Parse.ACL(user));
+  webActivity.save(null, {sessionToken: token}).then((webActivityResult) => {
+    res.success({id: webActivityResult.id});
+  }, (webActivityResult, error) => {
+    res.error(error.code, error.message);
+  });
+});
+
 Parse.Cloud.define('mturk-reset', (req, res) => {
   let user = req.user;
 
