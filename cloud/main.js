@@ -136,6 +136,32 @@ Parse.Cloud.define('sum-total-time', (req, res) => {
   });
 });
 
+Parse.Cloud.define('support-mail', (req, res) => {
+  let user = req.user;
+
+  if (!user) {
+    res.error(403, 'Forbidden: Not logged in');
+    return;
+  }
+  if (!(user.get('email') && user.get('emailVerified'))) {
+    res.error(403, 'Forbidden: Email must be verified');
+    return;
+  }
+
+  const token = user.getSessionToken();
+
+  if (!(req.params.subject && req.params.message)) {
+    res.error(400, 'Bad Request');
+    return;
+  }
+
+  const subject = req.params.subject.trim();
+  const message = req.params.message.trim();
+
+  let errors = [];
+
+});
+
 Parse.Cloud.define('user-export', (req, res) => {
   const userPointer = constructUserPointer(req, res);
   if (!userPointer) return;
@@ -155,14 +181,23 @@ Parse.Cloud.define('user-export', (req, res) => {
   });
 });
 
-Parse.Cloud.afterSave('Session', (req) => {
+Parse.Cloud.afterSave('Session', (req, res) => {
   let user = req.user;
   const token = user.getSessionToken();
 
   user.increment('totalTime', req.object.get('finishTime'));
   user.save(null, {sessionToken: token}).then((userResult) => {
-    res.success('OK');
+    res.success();
   }, (userResult, error) => {
     res.error(error.code, error.message);
   });
+});
+
+Parse.Cloud.beforeSave(Parse.User, (req, res) => {
+  let user = req.object;
+  if (!user.get('email')) {
+    res.error('Every user must have an email address.');
+  } else {
+    res.success();
+  }
 });
