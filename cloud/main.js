@@ -8,12 +8,12 @@ function constructUserPointer(req, res) {
   }
 
   if (!(req.params && req.params.uid)) {
-    res.error(406, 'Not Acceptable');
+    res.error(400, 'Bad Request');
     return;
   }
   const uid = req.params.uid;
   if (typeof uid !== 'string') {
-    res.error(406, 'ID must be a character sequence');
+    res.error(400, 'ID must be a character sequence');
     return;
   }
 
@@ -30,18 +30,18 @@ Parse.Cloud.define('hello', (req, res) => {
 
 Parse.Cloud.define('mturk-signup', (req, res) => {
   if (!(req.params && req.params.mid)) {
-    res.error(406, 'Not Acceptable');
+    res.error(400, 'Bad Request');
     return;
   }
 
   const mid = req.params.mid;
 
   if (typeof mid !== 'string') {
-    res.error(406, 'ID must be a character sequence');
+    res.error(400, 'ID must be a character sequence');
     return;
   }
   if (mid.length < 6 || mid.length > 28) {
-    res.error(406, 'Invalid ID length');
+    res.error(400, 'Invalid ID length');
     return;
   }
 
@@ -85,14 +85,14 @@ Parse.Cloud.define('mturk-reset', (req, res) => {
   let user = req.user;
 
   if (!(req.params && req.params.mid)) {
-    res.error(406, 'Not Acceptable');
+    res.error(400, 'Bad Request');
     return;
   }
 
   const mid = req.params.mid;
 
   if (typeof mid !== 'string') {
-    res.error(406, 'ID must be a character sequence');
+    res.error(400, 'ID must be a character sequence');
     return;
   }
   if (!user) {
