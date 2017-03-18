@@ -45,7 +45,7 @@ Parse.Cloud.define('mturk-signup', (req, res) => {
     return;
   }
 
-  let user = new Parse.User();
+  const user = new Parse.User();
   const password = passwordGen(4);
   user.set('username', mid);
   user.set('password', password);
@@ -53,36 +53,36 @@ Parse.Cloud.define('mturk-signup', (req, res) => {
   user.set('mturkid', mid);
   user.set('completed', false);
 
-  user.signUp(null).then((userResult) => {
+  user.signUp(null).then((result) => {
     res.success({'password': password});
-  }, (userResult, error) => {
+  }, (result, error) => {
     res.error(error.code, error.message);
   });
 });
 
 Parse.Cloud.define('init-web-activity', (req, res) => {
-  let user = req.user;
+  const user = req.user;
 
   if (!user) {
-    res.error(403, 'Forbidden: Not logged in');
+    res.error(403, 'Not logged in');
     return;
   }
 
   const token = user.getSessionToken();
 
-  let WebActivity = Parse.Object.extend('WebActivity');
-  let webActivity = new WebActivity();
+  const WebActivity = Parse.Object.extend('WebActivity');
+  const webActivity = new WebActivity();
   webActivity.set('user', user);
   webActivity.setACL(new Parse.ACL(user));
-  webActivity.save(null, {sessionToken: token}).then((webActivityResult) => {
-    res.success({id: webActivityResult.id});
-  }, (webActivityResult, error) => {
+  webActivity.save(null, {sessionToken: token}).then((result) => {
+    res.success({id: result.id});
+  }, (result, error) => {
     res.error(error.code, error.message);
   });
 });
 
 Parse.Cloud.define('mturk-reset', (req, res) => {
-  let user = req.user;
+  const user = req.user;
 
   if (!(req.params && req.params.mid)) {
     res.error(400, 'Bad Request');
@@ -96,15 +96,15 @@ Parse.Cloud.define('mturk-reset', (req, res) => {
     return;
   }
   if (!user) {
-    res.error(403, 'Forbidden: Not logged in');
+    res.error(403, 'Not logged in');
     return;
   }
   if (user.get('username') !== mid) {
-    res.error(403, 'Forbidden: Wrong username');
+    res.error(403, 'Wrong username');
     return;
   }
   if (user.get('mturkid') !== mid) {
-    res.error(403, 'Forbidden: Wrong ID');
+    res.error(403, 'Wrong ID');
     return;
   }
 
@@ -112,9 +112,9 @@ Parse.Cloud.define('mturk-reset', (req, res) => {
 
   const password = passwordGen(4);
   user.set('password', password);
-  user.save(null, {sessionToken: token}).then((userResult) => {
+  user.save(null, {sessionToken: token}).then((result) => {
     res.success({'password': password});
-  }, (userResult, error) => {
+  }, (result, error) => {
     res.error(error.code, error.message);
   });
 });
@@ -123,7 +123,7 @@ Parse.Cloud.define('sum-total-time', (req, res) => {
   const userPointer = constructUserPointer(req, res);
   if (!userPointer) return;
 
-  let query = new Parse.Query('Session');
+  const query = new Parse.Query('Session');
   query.equalTo('player', userPointer);
   query.find({useMasterKey: true}).then((results) => {
     let sum = 0;
@@ -166,13 +166,13 @@ Parse.Cloud.define('user-export', (req, res) => {
   const userPointer = constructUserPointer(req, res);
   if (!userPointer) return;
 
-  let userQuery = new Parse.Query('_User');
+  const userQuery = new Parse.Query('_User');
   userQuery.equalTo('objectId', userPointer.objectId);
-  let userPromise = userQuery.first({useMasterKey: true});
+  const userPromise = userQuery.first({useMasterKey: true});
 
-  let sessionsQuery = new Parse.Query('Session');
+  const sessionsQuery = new Parse.Query('Session');
   sessionsQuery.equalTo('player', userPointer);
-  let sessionsPromise = sessionsQuery.find({useMasterKey: true});
+  const sessionsPromise = sessionsQuery.find({useMasterKey: true});
 
   Parse.Promise.when([userPromise, sessionsPromise]).then((results) => {
     res.success(results);
@@ -182,19 +182,19 @@ Parse.Cloud.define('user-export', (req, res) => {
 });
 
 Parse.Cloud.afterSave('Session', (req, res) => {
-  let user = req.user;
+  const user = req.user;
   const token = user.getSessionToken();
 
   user.increment('totalTime', req.object.get('finishTime'));
-  user.save(null, {sessionToken: token}).then((userResult) => {
+  user.save(null, {sessionToken: token}).then((result) => {
     res.success();
-  }, (userResult, error) => {
+  }, (result, error) => {
     res.error(error.code, error.message);
   });
 });
 
 Parse.Cloud.beforeSave(Parse.User, (req, res) => {
-  let user = req.object;
+  const user = req.object;
   if (!user.get('email')) {
     res.error('Every user must have an email address.');
   } else {
