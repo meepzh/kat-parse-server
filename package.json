@@ -12,8 +12,9 @@
     "express": "~4.11.x",
     "kerberos": "~0.0.x",
     "parse": "~1.8.0",
-    "parse-server": "*",
-    "password": "meepzh/password#eff-short"
+    "parse-server": "https://github.com/meepzh/parse-server/releases/download/2.3.7-ave/parse-server-2.3.7-ave.tgz",
+    "parse-server-mailgun-adapter-template": "github:meepzh/parse-server-mailgun-adapter-template",
+    "password": "github:meepzh/password#eff-short"
   },
   "scripts": {
     "start": "node index.js"
