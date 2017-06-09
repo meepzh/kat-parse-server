@@ -109,13 +109,18 @@ Parse.Cloud.define('mturk-reset', (req, res) => {
     return;
   }
 
+  console.log('Prepping mturk-reset');
   const token = user.getSessionToken();
 
   const password = passwordGen(4);
+  console.log('Generated password');
   user.set('password', password);
+  console.log('Set password');
   user.save(null, {sessionToken: token}).then((result) => {
+    console.log('Set password success!');
     res.success({'password': password});
   }, (result, error) => {
+    console.log('Set password error');
     res.error(error.code, error.message);
   });
 });
