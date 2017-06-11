@@ -58,7 +58,7 @@ Parse.Cloud.define('mturk-signup', (req, res) => {
 
   user.signUp(null).then((result) => {
     res.success({'password': password});
-  }, (result, error) => {
+  }, (error) => {
     res.error(error.code, error.message);
   });
 });
@@ -79,7 +79,7 @@ Parse.Cloud.define('init-web-activity', (req, res) => {
   webActivity.setACL(new Parse.ACL(user));
   webActivity.save(null, {sessionToken: token}).then((result) => {
     res.success({id: result.id});
-  }, (result, error) => {
+  }, (error) => {
     res.error(error.code, error.message);
   });
 });
@@ -115,7 +115,7 @@ Parse.Cloud.define('mturk-reset', (req, res) => {
   user.set('password', password);
   user.save(null, {sessionToken: token}).then((result) => {
     res.success({'password': password});
-  }, (result, error) => {
+  }, (error) => {
     res.error(error.code, error.message);
   });
 });
@@ -240,7 +240,7 @@ Parse.Cloud.define('support-mail', (req, res) => {
   .then(() => {
     // Save success
     res.success('OK');
-  }, (result, error) => {
+  }, (error) => {
     // Save fail
     console.error('Support Message Save', error);
     res.error(500, 'Internal Server Error');
@@ -273,7 +273,7 @@ Parse.Cloud.afterSave('Session', (req, res) => {
   user.increment('totalTime', req.object.get('finishTime'));
   user.save(null, {sessionToken: token}).then((result) => {
     res.success('OK');
-  }, (result, error) => {
+  }, (error) => {
     res.error(error.code, error.message);
   });
 });
