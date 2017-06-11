@@ -84,6 +84,7 @@ Parse.Cloud.define('init-web-activity', (req, res) => {
     res.success({id: result.id});
   }, (result, error) => {
     console.log('Web activity error');
+    console.log(result);
     console.log(error);
     res.error(error.code, error.message);
   });
@@ -126,6 +127,7 @@ Parse.Cloud.define('mturk-reset', (req, res) => {
     res.success({'password': password});
   }, (result, error) => {
     console.log('Set password error');
+    console.log(result);
     console.log(error);
     res.error(error.code, error.message);
   });
