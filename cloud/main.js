@@ -196,13 +196,16 @@ Parse.Cloud.define('support-mail', (req, res) => {
   })
 
   .then(() => {
+    // Add some important info to the email
+    let emailMessage = message + `\n\nFrom ${user.get('username')} <${user.get('email')}>`;
+
     // Send the email
     const mailgunPromise = new Parse.Promise();
     mailgun.sendEmail({
       to: process.env.SUPPORT_EMAIL,
       from: process.env.MAILGUN_FROM,
-      subject: subject,
-      text: message,
+      subject: 'KAT Support: ' + subject,
+      text: emailMessage,
       'h:Reply-To': user.get('email')
     }).then((data) => {
       mailgunPromise.resolve();
@@ -215,7 +218,7 @@ Parse.Cloud.define('support-mail', (req, res) => {
       mailgun.sendEmail({
         to: user.get('email'),
         from: process.env.MAILGUN_FROM,
-        subject: subject,
+        subject: 'KAT Support: ' + subject,
         text: message
       });
     }
