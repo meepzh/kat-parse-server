@@ -74,12 +74,17 @@ Parse.Cloud.define('init-web-activity', (req, res) => {
   const token = user.getSessionToken();
 
   const WebActivity = Parse.Object.extend('WebActivity');
+  console.log('Create new WebActivity');
   const webActivity = new WebActivity();
   webActivity.set('user', user);
   webActivity.setACL(new Parse.ACL(user));
+  console.log('Set web activity data');
   webActivity.save(null, {sessionToken: token}).then((result) => {
+    console.log('Web activity success!');
     res.success({id: result.id});
   }, (result, error) => {
+    console.log('Web activity error');
+    console.log(error);
     res.error(error.code, error.message);
   });
 });
@@ -121,6 +126,7 @@ Parse.Cloud.define('mturk-reset', (req, res) => {
     res.success({'password': password});
   }, (result, error) => {
     console.log('Set password error');
+    console.log(error);
     res.error(error.code, error.message);
   });
 });
