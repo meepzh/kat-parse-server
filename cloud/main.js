@@ -251,21 +251,49 @@ Parse.Cloud.define('support-mail', (req, res) => {
 });
 
 Parse.Cloud.define('user-export', (req, res) => {
-  const userPointer = masterUserPointerFromUID(req, res);
-  if (!userPointer) return;
+  if (!req.master) {
+    res.error(403, 'Forbidden');
+    return;
+  }
+
+  const uid = req.params.uid;
+  const mid = req.params.mid;
+  if (!uid && !mid) {
+    res.error(400, 'Bad Request');
+    return;
+  }
+  if (typeof uid !== 'string' && typeof mid !== 'string') {
+    res.error(400, 'ID must be a character sequence');
+    return;
+  }
 
   const userQuery = new Parse.Query('_User');
-  userQuery.equalTo('objectId', userPointer.objectId);
+  if (uid) {
+    userQuery.equalTo('objectId', uid);
+  } else {
+    userQuery.equalTo('mturkid', mid);
+  }
   const userPromise = userQuery.first({useMasterKey: true});
 
-  const sessionsQuery = new Parse.Query('Session');
-  sessionsQuery.equalTo('player', userPointer);
-  const sessionsPromise = sessionsQuery.find({useMasterKey: true});
+  userPromise.then((result) => {
+    const userPointer = {
+      __type: 'Pointer',
+      className: '_User',
+      objectId: result.id
+    };
 
-  Parse.Promise.when([userPromise, sessionsPromise]).then((results) => {
+    const sessionsQuery = new Parse.Query('Session');
+    sessionsQuery.equalTo('player', userPointer);
+    return Parse.Promise.when([
+      Parse.Promise.as(result),
+      sessionsQuery.find({useMasterKey: true})
+    ]);
+  }, (error) => {
+    res.error(error.code, error.message);
+  }).then((results) => {
     res.success(results);
-  }, (errors) => {
-    res.error(errors);
+  }, (error) => {
+    res.error(error.code, error.message);
   });
 });
 
@@ -284,7 +312,7 @@ Parse.Cloud.afterSave('Session', (req, res) => {
 Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   const user = req.object;
   if (!user.get('email')) {
-    res.error('Every user must have an email address.');
+    res.error(400, 'Every user must have an email address.');
   } else {
     res.success('OK');
   }
